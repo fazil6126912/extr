@@ -1,19 +1,30 @@
-langchain>=0.3.0
-langchain-openai>=0.2.0
-langchain-community>=0.2.0
-langsmith>=0.3.0
-pydantic>=2.0.0
-python-dotenv>=1.0.0
-pymupdf>=1.24.0
-pillow>=10.0.0
-streamlit
-
 fastapi
 uvicorn[standard]
+
+# LangChain + LangGraph
 langchain
 langchain-openai
+langchain-community
+langchain-core
 langgraph
+langgraph-prebuilt
 langsmith
+
+# OpenAI
+openai
+
+# Parsing & validation
+pydantic
+pydantic-settings
+orjson
+
+# File & document processing
 pymupdf
+pillow
+python-multipart
+
+# Utilities
 python-dotenv
 requests
+tiktoken
+tqdm
