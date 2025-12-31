@@ -255,7 +255,7 @@ def process_file(temp_path: str, file_type: str, selected_model: str, is_vision:
             usage_metadata = response.usage_metadata
     else:
         # Image
-        if llm.model not in VISION_MODELS:
+        if selected_model not in VISION_MODELS:
             raise ValueError("Image requires vision model.")
         with open(temp_path, "rb") as image_file:
             img_data = base64.b64encode(image_file.read()).decode("utf-8")
@@ -314,30 +314,46 @@ def start_node(state: AgentState, files_data: List[Tuple[str, str]]) -> AgentSta
 
 # Parallel extraction node (called dynamically per file)
 def extract_node(state: AgentState, file_info: Tuple[str, str]) -> AgentState:
-    """Extract for one file."""
     file_name, file_type = file_info
-    # Simulate temp_path from state or global; in practice, save uploaded bytes
-    # For simplicity, assume temp_paths stored in state or regenerate
-    # Here, we'll assume files are processed sequentially in graph for demo; true parallel via fanout
-    temp_path = state["temp_paths"][file_name] # Placeholder
-    selected_model = state.get('model', 'gpt-4o')
+    temp_path = state["temp_paths"][file_name]
+    selected_model = state.get("model", "gpt-4o")
     is_vision = selected_model in VISION_MODELS
+
     try:
-        result, usage_metadata, latency = process_file(temp_path, file_type, selected_model, is_vision)
+        result, usage_metadata, latency = process_file(
+            temp_path, file_type, selected_model, is_vision
+        )
+
         usd, inr = calculate_cost(usage_metadata, selected_model)
+
         metadata = {
-            'input_tokens': usage_metadata.get('input_tokens', 0),
-            'output_tokens': usage_metadata.get('output_tokens', 0),
-            'total_tokens': usage_metadata.get('input_tokens', 0) + usage_metadata.get('output_tokens', 0),
-            'latency': latency,
-            'cost_usd': usd,
-            'cost_inr': inr
+            "input_tokens": usage_metadata.get("input_tokens", 0),
+            "output_tokens": usage_metadata.get("output_tokens", 0),
+            "total_tokens": usage_metadata.get("input_tokens", 0)
+                            + usage_metadata.get("output_tokens", 0),
+            "latency": latency,
+            "cost_usd": usd,
+            "cost_inr": inr,
         }
-        return {"results": {file_name: {"result": result,"metadata": metadata }}}
+
+        return {
+            "results": {
+                file_name: {
+                    "result": result,
+                    "metadata": metadata,
+                }
+            }
+        }
 
     except Exception as e:
-        state['results'][file_name] = {'error': str(e)}
-    return {"results": {file_name: { "error": str(e) } }}
+        return {
+            "results": {
+                file_name: {
+                    "error": str(e)
+                }
+            }
+        }
+
 
 # End node
 def end_node(state: AgentState) -> AgentState:
@@ -402,7 +418,7 @@ def main():
     print(f"Input tokens: {input_t:,} | Output tokens: {output_t:,} | Total tokens: {total_t:,} tokens / ${usd:.6f} / ₹{inr:.2f} | Latency: {latency:.2f}s")
 
 # Enhanced Streamlit UI for multi-file
-@st.cache_data
+# @st.cache_data
 def save_uploaded_files(uploaded_files):
     temp_paths = {}
     for uploaded_file in uploaded_files:
