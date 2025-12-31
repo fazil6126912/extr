@@ -7,3 +7,13 @@ python-dotenv>=1.0.0
 pymupdf>=1.24.0
 pillow>=10.0.0
 streamlit
+
+fastapi
+uvicorn[standard]
+langchain
+langchain-openai
+langgraph
+langsmith
+pymupdf
+python-dotenv
+requests
